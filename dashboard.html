@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellness Pro | สุขภาพของคุณ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <aside class="w-72 bg-white border-r border-gray-200 p-8 hidden md:flex flex-col fixed h-full">
+        <div class="mb-10 text-center">
+            <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <h2 id="dispName" class="font-bold text-lg text-slate-800">กำลังโหลด...</h2>
+            <p id="dispEmail" class="text-xs text-slate-400 mt-1"></p>
+            <div class="mt-4 flex flex-col gap-2 text-sm text-slate-600 text-left px-2">
+                <p><i class="fa-solid fa-venus-mars mr-2 text-emerald-500"></i><span id="dispGender">-</span></p>
+                <p><i class="fa-solid fa-phone mr-2 text-emerald-500"></i><span id="dispPhone">-</span></p>
+            </div>
+        </div>
+
+        <nav class="space-y-4 flex-1">
+            <button onclick="showContent('dashboard')" class="w-full text-left p-4 rounded-2xl bg-emerald-50 text-emerald-600 font-bold"><i class="fa-solid fa-house mr-3"></i> หน้าหลัก</button>
+            <button onclick="showContent('diseases')" class="w-full text-left p-4 rounded-2xl text-slate-500 hover:bg-slate-50 font-medium"><i class="fa-solid fa-book-medical mr-3"></i> สารานุกรมโรค</button>
+        </nav>
+        <button onclick="handleLogout()" class="w-full text-left p-4 rounded-2xl text-red-400 hover:bg-red-50 font-medium"><i class="fa-solid fa-right-from-bracket mr-3"></i> ออกจากระบบ</button>
+    </aside>
+
+    <main class="flex-1 md:ml-72 p-10">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-800">สวัสดี, <span id="userNameHeader">ผู้ใช้งาน</span></h2>
+            </div>
+            <button onclick="toggleModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-emerald-200 transition">
+                <i class="fa-solid fa-plus mr-2"></i> บันทึกสุขภาพ
+            </button>
+        </header>
+
+        <div id="content-dashboard">
+            <h3 class="text-lg font-bold text-slate-700 mb-6">ประวัติและคำแนะนำล่าสุด</h3>
+            <div id="history-list" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+        </div>
+
+        <div id="content-diseases" class="hidden space-y-8">
+            <h3 class="text-2xl font-bold text-slate-700">คลังสารานุกรมโรค</h3>
+            <div id="disease-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+        </div>
+    </main>
+
+    <div id="healthModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg p-8 rounded-3xl shadow-2xl">
+            <h3 class="text-2xl font-bold mb-6 text-slate-800">บันทึกข้อมูลสุขภาพ</h3>
+            <form id="healthForm" class="space-y-4">
+                <input type="number" id="inWeight" placeholder="น้ำหนัก (kg)" required class="w-full p-4 bg-slate-50 rounded-2xl border outline-none">
+                <input type="number" id="inHeight" placeholder="ส่วนสูง (cm)" required class="w-full p-4 bg-slate-50 rounded-2xl border outline-none">
+                <input type="text" id="inBP" placeholder="ความดัน (เช่น 120/80)" required class="w-full p-4 bg-slate-50 rounded-2xl border outline-none">
+                <div class="flex gap-4 mt-6">
+                    <button type="button" onclick="toggleModal()" class="flex-1 p-4 rounded-2xl font-bold text-slate-400">ยกเลิก</button>
+                    <button type="submit" class="flex-1 p-4 bg-emerald-600 text-white rounded-2xl font-bold">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const diseases = [
+            { name: "ความดันโลหิตสูง", cause: "ทานเค็มจัด, เครียด, พันธุกรรม", fix: "ลดโซเดียม, ออกกำลังกายวันละ 30 นาที, ทำจิตใจให้สงบ" },
+            { name: "ไขมันในเลือดสูง", cause: "กินของทอด ของมัน, ขาดการเคลื่อนไหว", fix: "เน้นปลาและผักใบเขียว, งดของทอด, ออกกำลังกายสม่ำเสมอ" },
+            { name: "โรคหลอดเลือดหัวใจ", cause: "สูบบุหรี่, คอเลสเตอรอลสูง, เบาหวาน", fix: "เลิกบุหรี่, ตรวจเช็คน้ำตาลและไขมัน, คุมน้ำหนัก" },
+            { name: "เบาหวาน", cause: "ร่างกายดื้ออินซูลิน, กินน้ำตาลมากเกินไป", fix: "คุมแป้งและน้ำตาล, ทานผักไฟเบอร์สูง, ออกกำลังกายเพื่อคุมน้ำตาลในเลือด" },
+            { name: "ไทรอยด์เป็นพิษ", cause: "ต่อมไทรอยด์ทำงานเกินปกติ", fix: "ทานยาตามแพทย์สั่งอย่างเคร่งครัด, พักผ่อนให้เพียงพอ" },
+            { name: "ภาวะอ้วน", cause: "กินพลังงานมากกว่าที่ใช้, พันธุกรรม", fix: "ปรับโภชนาการ (ลดหวานมันเค็ม), เพิ่มกิจกรรมทางกาย" },
+            { name: "กรดไหลย้อน", cause: "กินแล้วนอน, เคี้ยวอาหารไม่ละเอียด", fix: "เลิกกินมื้อดึก, หนุนหัวเตียงให้สูง, ไม่กินมื้อใหญ่ก่อนนอน" },
+            { name: "กระเพาะอาหารอักเสบ", cause: "กินไม่ตรงเวลา, ติดเชื้อ H. pylori", fix: "ทานอาหารให้ตรงเวลา, เคี้ยวให้ละเอียด, ลดเครื่องดื่มคาเฟอีน" },
+            { name: "นิ่วในถุงน้ำดี", cause: "ระดับคอเลสเตอรอลในน้ำดีสูง", fix: "ทานอาหารไขมันต่ำ, คุมน้ำหนักไม่ให้เกินเกณฑ์" },
+            { name: "ออฟฟิศซินโดรม", cause: "นั่งทำงานท่าเดิมนานๆ, จัดโต๊ะไม่เหมาะสม", fix: "ยืดเหยียดทุกชั่วโมง, ปรับจอภาพให้อยู่ในระดับสายตา" },
+            { name: "ข้อเข่าเสื่อม", cause: "ใช้งานหนัก, น้ำหนักตัวเกิน", fix: "ลดน้ำหนักเพื่อลดแรงกดที่เข่า, ออกกำลังกายแบบไม่กระแทก (ว่ายน้ำ, ปั่นจักรยาน)" },
+            { name: "ปวดหลังเรื้อรัง", cause: "ยกของหนักผิดวิธี, กล้ามเนื้อหลังไม่แข็งแรง", fix: "ฝึกท่าบริหารหน้าท้องและหลัง, ปรับท่าทางการนั่งและยกของ" },
+            { name: "ภูมิแพ้อากาศ", cause: "ฝุ่น PM2.5, ไรฝุ่น, สภาพอากาศเปลี่ยน", fix: "ใส่หน้ากากอนามัย, ล้างจมูกด้วยน้ำเกลือ, ทำความสะอาดเครื่องนอน" },
+            { name: "หอบหืด", cause: "หลอดลมไวต่อสิ่งกระตุ้น", fix: "เลี่ยงควันบุหรี่และฝุ่น, พกยาพ่นฉุกเฉินติดตัว" },
+            { name: "ไมเกรน", cause: "แสงจ้า, เสียงดัง, ความเครียด, พักผ่อนน้อย", fix: "พักผ่อนในห้องมืดและเงียบ, จดบันทึกสิ่งที่กระตุ้นอาการ" },
+            { name: "นอนไม่หลับ", cause: "ความเครียด, คาเฟอีน, ใช้มือถือก่อนนอน", fix: "กำหนดเวลานอนให้ตรงกันทุกวัน, งดหน้าจอก่อนนอน 1 ชม." }
+        ];
+
+        window.onload = function() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user) {
+                document.getElementById('dispName').innerText = user.name;
+                document.getElementById('userNameHeader').innerText = user.name;
+                document.getElementById('dispEmail').innerText = user.email;
+                document.getElementById('dispGender').innerText = user.gender;
+                document.getElementById('dispPhone').innerText = user.phone;
+            }
+            
+            renderHistory();
+
+            const diseaseList = document.getElementById('disease-list');
+            diseases.forEach(d => {
+                diseaseList.innerHTML += `
+                    <div class="bg-white p-6 rounded-3xl card-shadow border border-slate-100 hover:border-emerald-200 transition">
+                        <h4 class="font-bold text-emerald-600 text-lg mb-2">${d.name}</h4>
+                        <p class="text-sm text-slate-500 mb-2">สาเหตุ: ${d.cause}</p>
+                        <div class="bg-slate-50 p-3 rounded-xl text-xs font-medium text-slate-700">การดูแล: ${d.fix}</div>
+                    </div>
+                `;
+            });
+        };
+
+        function renderHistory() {
+            const historyList = document.getElementById('history-list');
+            const records = JSON.parse(localStorage.getItem('health_records')) || [];
+            historyList.innerHTML = records.map(h => `
+                <div class="bg-white p-6 rounded-3xl card-shadow border border-emerald-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <p class="text-xl font-bold text-slate-800">ประวัติบันทึก</p>
+                        <span class="text-sm text-slate-400">${h.date}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-slate-50 p-3 rounded-xl"><span class="text-gray-500">น้ำหนัก:</span> <span class="font-bold">${h.w} kg</span></div>
+                        <div class="bg-slate-50 p-3 rounded-xl"><span class="text-gray-500">ส่วนสูง:</span> <span class="font-bold">${h.h_cm} cm</span></div>
+                    </div>
+                    <p class="text-lg font-semibold text-emerald-600">BMI: ${h.bmi}</p>
+                    <p class="text-sm text-red-500 font-bold mt-2">${h.advice}</p>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('healthForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const w = document.getElementById('inWeight').value;
+            const h_cm = document.getElementById('inHeight').value;
+            const bp_input = document.getElementById('inBP').value;
+            const bmi = (parseFloat(w) / ((parseFloat(h_cm)/100)**2)).toFixed(1);
+            const systolic = parseInt(bp_input.split('/')[0]);
+            
+            let advice = "✅ สุขภาพอยู่ในเกณฑ์ปกติ";
+            let risks = [];
+            if (bmi >= 25) risks.push("⚠️ เสี่ยงภาวะอ้วน (เบาหวาน, ไขมันในเลือดสูง)");
+            if (systolic >= 140) risks.push("⚠️ เสี่ยงความดันโลหิตสูง");
+            if (risks.length > 0) advice = risks.join(" และ ");
+            
+            const newEntry = { date: new Date().toLocaleDateString('th-TH'), w, h_cm, bmi, advice };
+            
+            let records = JSON.parse(localStorage.getItem('health_records')) || [];
+            records.unshift(newEntry);
+            localStorage.setItem('health_records', JSON.stringify(records));
+            
+            renderHistory();
+            toggleModal();
+            this.reset();
+        });
+
+        function showContent(id) {
+            document.getElementById('content-dashboard').classList.toggle('hidden', id !== 'dashboard');
+            document.getElementById('content-diseases').classList.toggle('hidden', id !== 'diseases');
+        }
+
+        function toggleModal() { document.getElementById('healthModal').classList.toggle('hidden'); }
+        function handleLogout() { window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>
